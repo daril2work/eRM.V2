@@ -1,0 +1,149 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Patient {
+  id            String   @id @default(cuid())
+  no_rm         String   @unique
+  nama          String
+  tanggal_lahir DateTime
+  gender        String
+  alamat        String
+  no_hp         String
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  visits        Visit[]
+}
+
+model Visit {
+  id         String   @id @default(cuid())
+  patient_id String
+  patient    Patient  @relation(fields: [patient_id], references: [id])
+  tanggal    DateTime @default(now())
+  poli       String   // "umum" | "gigi"
+  status     String   @default("menunggu") // "menunggu" | "diproses" | "selesai"
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  soap_note      SoapNote?
+  diagnoses      Diagnosis[]
+  treatments     Treatment[]
+  prescriptions  Prescription[]
+  lab_requests   LabRequest[]
+  dental_records DentalRecord[]
+}
+
+model DentalRecord {
+  id         String   @id @default(cuid())
+  visit_id   String
+  visit      Visit    @relation(fields: [visit_id], references: [id])
+  tooth_num  String   // FDI notation: 11-18, 21-28, 31-38, 41-48
+  condition  String   // normal, caries, missing, filling, crown, root_canal, extraction
+  notes      String?
+  created_at DateTime @default(now())
+
+  @@unique([visit_id, tooth_num])
+}
+
+model SoapNote {
+  id         String   @id @default(cuid())
+  visit_id   String   @unique
+  visit      Visit    @relation(fields: [visit_id], references: [id])
+  subjective String
+  objective  String
+  assessment String
+  plan       String
+  created_at DateTime @default(now())
+}
+
+model Diagnosis {
+  id          String   @id @default(cuid())
+  visit_id    String
+  visit       Visit    @relation(fields: [visit_id], references: [id])
+  icd_code    String
+  description String?
+  created_at  DateTime @default(now())
+}
+
+model Treatment {
+  id         String   @id @default(cuid())
+  visit_id   String
+  visit      Visit    @relation(fields: [visit_id], references: [id])
+  name       String
+  amount     Float?
+  created_at DateTime @default(now())
+}
+
+model Prescription {
+  id         String   @id @default(cuid())
+  visit_id   String
+  visit      Visit    @relation(fields: [visit_id], references: [id])
+  status     String   @default("menunggu") // "menunggu" | "disiapkan" | "selesai"
+  items      PrescriptionItem[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model PrescriptionItem {
+  id              String       @id @default(cuid())
+  prescription_id String
+  prescription    Prescription @relation(fields: [prescription_id], references: [id])
+  nama_obat       String
+  aturan          String
+  jumlah          Int
+}
+
+model LabRequest {
+  id         String   @id @default(cuid())
+  visit_id   String
+  visit      Visit    @relation(fields: [visit_id], references: [id])
+  test_name  String
+  status     String   @default("menunggu") // "menunggu" | "selesai"
+  result     LabResult?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model LabResult {
+  id             String     @id @default(cuid())
+  lab_request_id String     @unique
+  lab_request    LabRequest @relation(fields: [lab_request_id], references: [id])
+  hasil          String
+  catatan        String?
+  created_at     DateTime   @default(now())
+}
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  nama      String
+  role      String   // admin, registrasi, poli_umum, poli_gigi, farmasi, lab
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Medicine {
+  id          String   @id @default(cuid())
+  kode        String   @unique
+  nama        String
+  satuan      String   // tablet, kapsul, sirup, dll
+  stok        Int      @default(0)
+  harga       Float    @default(0)
+  minStok     Int      @default(10) // alert jika stok di bawah ini
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
