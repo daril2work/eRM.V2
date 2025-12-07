@@ -95,3 +95,29 @@ export async function finishVisit(visitId: string, poli: string) {
     });
     revalidatePath(`/poli/${poli}`);
 }
+
+export async function checkVisitStatus(visitId: string) {
+    const visit = await prisma.visit.findUnique({
+        where: { id: visitId },
+        include: {
+            prescriptions: true,
+            lab_requests: true,
+        },
+    });
+
+    const hasPrescription = (visit?.prescriptions.length ?? 0) > 0;
+    const hasLabRequest = (visit?.lab_requests.length ?? 0) > 0;
+
+    console.log("[checkVisitStatus]", {
+        visitId,
+        prescriptionsCount: visit?.prescriptions.length ?? 0,
+        labRequestsCount: visit?.lab_requests.length ?? 0,
+        hasPrescription,
+        hasLabRequest,
+    });
+
+    return {
+        hasPrescription,
+        hasLabRequest,
+    };
+}

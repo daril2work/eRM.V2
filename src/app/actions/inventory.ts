@@ -67,14 +67,18 @@ export async function updateMedicine(id: string, data: {
     satuan?: string;
     harga?: number;
     minStok?: number;
-}) {
-    await prisma.medicine.update({
-        where: { id },
-        data,
-    });
+}): Promise<{ success: boolean; error?: string }> {
+    try {
+        await prisma.medicine.update({
+            where: { id },
+            data,
+        });
 
-    revalidatePath("/farmasi/inventory");
-    return { success: true };
+        revalidatePath("/farmasi/inventory");
+        return { success: true };
+    } catch {
+        return { success: false, error: "Gagal mengupdate data obat" };
+    }
 }
 
 export async function updateStock(id: string, jumlah: number, tipe: "masuk" | "keluar") {

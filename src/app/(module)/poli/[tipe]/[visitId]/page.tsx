@@ -1,6 +1,7 @@
 import { finishVisit, getVisitDetail } from "@/app/actions/poli";
 import { getPatientHistory } from "@/app/actions/patient";
 import { getDentalRecords } from "@/app/actions/dental";
+import { getSickLetter } from "@/app/actions/sickLetter";
 import { requireAuth } from "@/app/actions/auth";
 import { DiagnosisInput } from "@/components/modules/poli/DiagnosisInput";
 import { LabRequestBuilder } from "@/components/modules/poli/LabRequestBuilder";
@@ -8,7 +9,8 @@ import { PrescriptionBuilder } from "@/components/modules/poli/PrescriptionBuild
 import { SoapForm } from "@/components/modules/poli/SoapForm";
 import { PatientHistory } from "@/components/modules/poli/PatientHistory";
 import { Odontogram } from "@/components/modules/poli/Odontogram";
-import { Button } from "@/components/ui/button";
+import { SickLetterForm } from "@/components/modules/poli/SickLetterForm";
+import { FinishVisitButton } from "@/components/modules/poli/FinishVisitButton";
 import { notFound, redirect } from "next/navigation";
 
 export default async function VisitPage({ params }: { params: Promise<{ tipe: string; visitId: string }> }) {
@@ -29,9 +31,13 @@ export default async function VisitPage({ params }: { params: Promise<{ tipe: st
     // Get dental records if poli gigi
     const dentalRecords = tipe === "gigi" ? await getDentalRecords(visitId) : [];
 
+    // Get existing sick letter
+    const sickLetter = await getSickLetter(visitId);
+
     async function handleFinish() {
         "use server";
         await finishVisit(visitId, tipe);
+        redirect(`/poli/${tipe}`);
     }
 
     // Calculate age
@@ -86,12 +92,22 @@ export default async function VisitPage({ params }: { params: Promise<{ tipe: st
                     </div>
                 </section>
 
+                {/* Sick Letter Section */}
+                <section>
+                    <SickLetterForm
+                        visitId={visitId}
+                        patient={visit.patient}
+                        diagnoses={visit.diagnoses}
+                        existingLetter={sickLetter}
+                    />
+                </section>
+
                 <section className="pt-8 border-t flex justify-end">
-                    <form action={handleFinish}>
-                        <Button size="lg" className="bg-green-600 hover:bg-green-700">
-                            Selesaikan Pemeriksaan & Pulangkan
-                        </Button>
-                    </form>
+                    <FinishVisitButton
+                        visitId={visitId}
+                        poli={tipe}
+                        onFinish={handleFinish}
+                    />
                 </section>
             </div>
         </div>

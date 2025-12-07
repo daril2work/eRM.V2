@@ -54,21 +54,39 @@ export async function updateUser(id: string, data: {
     nama?: string;
     role?: string;
     password?: string;
-}) {
+}): Promise<{ success: boolean; error?: string }> {
     await requireAuth();
 
-    const updateData: any = {};
-    if (data.nama) updateData.nama = data.nama;
-    if (data.role) updateData.role = data.role;
-    if (data.password) updateData.password = await hashPassword(data.password);
+    try {
+        const updateData: any = {};
+        if (data.nama) updateData.nama = data.nama;
+        if (data.role) updateData.role = data.role;
+        if (data.password) updateData.password = await hashPassword(data.password);
 
-    await prisma.user.update({
+        await prisma.user.update({
+            where: { id },
+            data: updateData,
+        });
+
+        revalidatePath("/admin");
+        return { success: true };
+    } catch {
+        return { success: false, error: "Gagal mengupdate user" };
+    }
+}
+
+export async function getUserById(id: string) {
+    await requireAuth();
+    return prisma.user.findUnique({
         where: { id },
-        data: updateData,
+        select: {
+            id: true,
+            username: true,
+            nama: true,
+            role: true,
+            active: true,
+        },
     });
-
-    revalidatePath("/admin");
-    return { success: true };
 }
 
 export async function toggleUserActive(id: string) {

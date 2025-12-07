@@ -97,9 +97,9 @@ export function PatientHistory({ patientName, patientRM, visits, currentVisitId 
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="flex gap-1">
-                                    {visit.soap_note && <Stethoscope className="w-4 h-4 text-blue-500" title="SOAP" />}
-                                    {visit.prescriptions.length > 0 && <Pill className="w-4 h-4 text-green-500" title="Resep" />}
-                                    {visit.lab_requests.length > 0 && <FlaskConical className="w-4 h-4 text-purple-500" title="Lab" />}
+                                    {visit.soap_note && <Stethoscope className="w-4 h-4 text-blue-500" />}
+                                    {visit.prescriptions.length > 0 && <Pill className="w-4 h-4 text-green-500" />}
+                                    {visit.lab_requests.length > 0 && <FlaskConical className="w-4 h-4 text-purple-500" />}
                                 </div>
                                 {expandedVisit === visit.id ? (
                                     <ChevronUp className="w-5 h-5 text-slate-400" />

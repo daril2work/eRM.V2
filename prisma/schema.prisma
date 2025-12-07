@@ -42,6 +42,18 @@ model Visit {
   prescriptions  Prescription[]
   lab_requests   LabRequest[]
   dental_records DentalRecord[]
+  sick_letter    SickLetter?
+}
+
+model SickLetter {
+  id           String   @id @default(cuid())
+  visit_id     String   @unique
+  visit        Visit    @relation(fields: [visit_id], references: [id])
+  tanggal_mulai DateTime
+  jumlah_hari  Int
+  keterangan   String?
+  nomor_surat  String
+  created_at   DateTime @default(now())
 }
 
 model DentalRecord {
