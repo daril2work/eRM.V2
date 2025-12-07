@@ -91,7 +91,7 @@ export async function canAccessPath(path: string): Promise<boolean> {
     return allowedPaths.some(p => path.startsWith(p));
 }
 
-export async function getDefaultRedirect(role: string): string {
+export async function getDefaultRedirect(role: string): Promise<string> {
     switch (role) {
         case "admin": return "/admin";
         case "registrasi": return "/registrasi";
