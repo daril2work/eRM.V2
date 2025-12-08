@@ -25,14 +25,12 @@ export default async function VisitPage({ params }: { params: Promise<{ tipe: st
 
     if (!visit) return notFound();
 
-    // Get patient history for doctors
-    const patientHistory = await getPatientHistory(visit.patient_id);
-
-    // Get dental records if poli gigi
-    const dentalRecords = tipe === "gigi" ? await getDentalRecords(visitId) : [];
-
-    // Get existing sick letter
-    const sickLetter = await getSickLetter(visitId);
+    // Fetch independent data in parallel
+    const [patientHistory, dentalRecords, sickLetter] = await Promise.all([
+        getPatientHistory(visit.patient_id),
+        tipe === "gigi" ? getDentalRecords(visitId) : [],
+        getSickLetter(visitId)
+    ]);
 
     async function handleFinish() {
         "use server";
