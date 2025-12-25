@@ -17,6 +17,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "eRM Klinik",
   description: "Sistem Rekam Medis Elektronik Puskesmas",
+  manifest: "/manifest.json",
 };
 
 export default async function RootLayout({
